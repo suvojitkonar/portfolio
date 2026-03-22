@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Neobrutalism-inspired theme: high contrast, hard shadows, thick borders.
+  Aligned with patterns from https://www.neobrutalism.dev/docs
+*/
+@layer base {
+  :root {
+    --background: 48 100% 97%;
+    --foreground: 0 0% 7%;
+    --card: 0 0% 100%;
+    --muted: 0 0% 45%;
+    --border: 0 0% 7%;
+    --ring: 0 0% 7%;
+    --primary: 32 100% 52%;
+    --accent: 330 85% 60%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(80px);
+  transition: all 0.8s ease;
+}
