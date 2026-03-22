@@ -5,12 +5,14 @@ import ScreenHeading from "@/components/portfolio/ScreenHeading/ScreenHeading";
 import Animations from "@/lib/animations";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { getWhatsAppHref } from "@/lib/whatsapp";
 
 const CONTACT_EMAIL = "suvojitkonar11@gmail.com";
 
 type Props = { id?: string; screenName?: string };
 
 export default function ContactMe({ id }: Props) {
+  const whatsappHref = getWhatsAppHref();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -102,12 +104,23 @@ export default function ContactMe({ id }: Props) {
             </Button>
           </form>
           <div className="mt-10 flex flex-wrap justify-center gap-6 border-t-4 border-foreground pt-8 text-2xl sm:gap-8">
+            {whatsappHref ? (
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                className="text-foreground transition-colors transition-transform hover:scale-125 hover:text-[#25D366]"
+              >
+                <i className="fa fa-whatsapp" aria-hidden />
+              </a>
+            ) : null}
             <a
               href="https://www.linkedin.com/in/suvojit-konar-5168a6161/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="LinkedIn"
-              className="text-foreground transition-transform hover:scale-125"
+              className="text-foreground transition-colors transition-transform hover:scale-125 hover:text-[#0A66C2]"
             >
               <i className="fa fa-linkedin" />
             </a>
@@ -116,7 +129,7 @@ export default function ContactMe({ id }: Props) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
-              className="text-foreground transition-transform hover:scale-125"
+              className="text-foreground transition-colors transition-transform hover:scale-125 hover:text-[#E4405F]"
             >
               <i className="fa fa-instagram" />
             </a>
@@ -125,7 +138,7 @@ export default function ContactMe({ id }: Props) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Email"
-              className="text-foreground transition-transform hover:scale-125"
+              className="text-foreground transition-colors transition-transform hover:scale-125 hover:text-[#EA4335]"
             >
               <i className="fa fa-google" />
             </a>

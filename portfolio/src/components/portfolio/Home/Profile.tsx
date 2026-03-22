@@ -2,9 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { usePortfolioNav } from "@/lib/portfolioNav";
+import { getWhatsAppHref } from "@/lib/whatsapp";
 
 export default function Profile() {
   const { goTo } = usePortfolioNav();
+  const whatsappHref = getWhatsAppHref();
   return (
     <div className="flex flex-col items-center justify-center px-4 pb-8 pt-12 text-foreground">
       <div className="flex w-full max-w-5xl flex-col-reverse items-center gap-10 md:flex-row md:justify-between md:gap-4">
@@ -12,24 +14,35 @@ export default function Profile() {
           <div className="mb-4 flex justify-center gap-4 text-2xl text-foreground md:justify-start">
             <a
               href="https://mail.google.com/mail/u/0/#inbox"
-              className="transition-transform hover:scale-125"
+              className="text-foreground transition-colors transition-transform hover:scale-125 hover:text-[#EA4335]"
               aria-label="Email"
             >
               <i className="fa fa-google-plus-square" />
             </a>
             <a
               href="https://www.instagram.com/suvojitkonar/"
-              className="transition-transform hover:scale-125"
+              className="text-foreground transition-colors transition-transform hover:scale-125 hover:text-[#E4405F]"
               aria-label="Instagram"
             >
               <i className="fa fa-instagram" />
             </a>
             <a
               href="https://www.linkedin.com/in/suvojit-konar-5168a6161/"
-              className="transition-transform hover:scale-125"
+              className="text-foreground transition-colors transition-transform hover:scale-125 hover:text-[#0A66C2]"
             >
               <i className="fa fa-linkedin" aria-label="LinkedIn" />
             </a>
+            {whatsappHref ? (
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground transition-colors transition-transform hover:scale-125 hover:text-[#25D366]"
+                aria-label="WhatsApp"
+              >
+                <i className="fa fa-whatsapp" aria-hidden />
+              </a>
+            ) : null}
           </div>
           <p className="text-xl font-semibold md:text-2xl">
             Hello, I&apos;m{" "}
