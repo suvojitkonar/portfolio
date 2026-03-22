@@ -2,16 +2,11 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import BlogMarkdown from "@/components/portfolio/Blog/BlogMarkdown";
-import {
-  getProjectById,
-  projects,
-} from "@/components/portfolio/Projects/projectsData";
+import { getProjectById } from "@/lib/projects";
+
+export const dynamic = "force-dynamic";
 
 type Props = { params: { id: string } };
-
-export function generateStaticParams() {
-  return projects.map((p) => ({ id: p.id }));
-}
 
 export function generateMetadata({ params }: Props): Metadata {
   const project = getProjectById(params.id);

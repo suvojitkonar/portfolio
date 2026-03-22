@@ -20,8 +20,8 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import type { Project } from "./projectsData";
-import { projectByIdMap } from "./projectsData";
+import type { Project } from "@/lib/project-model";
+import { projectByIdMap } from "@/lib/project-model";
 import {
   COLUMN_IDS,
   type ColumnId,

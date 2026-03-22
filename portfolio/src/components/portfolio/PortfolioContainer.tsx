@@ -3,17 +3,20 @@
 import { useCallback, useState } from "react";
 import Header from "@/components/portfolio/Home/Header";
 import Blog from "@/components/portfolio/Blog/Blog";
+import Projects from "@/components/portfolio/Projects/Projects";
 import SiteFooter from "@/components/portfolio/SiteFooter";
 import { TOTAL_SCREENS } from "@/lib/commonUtilities";
 import type { BlogPostMeta } from "@/lib/blog";
+import type { Project } from "@/lib/project-model";
 import { PortfolioNavProvider } from "@/lib/portfolioNav";
 import { cn } from "@/lib/utils";
 
 type Props = {
   blogPostsMeta: BlogPostMeta[];
+  projects: Project[];
 };
 
-export default function PortfolioContainer({ blogPostsMeta }: Props) {
+export default function PortfolioContainer({ blogPostsMeta, projects }: Props) {
   const [activeScreen, setActiveScreen] = useState("Home");
   const goTo = useCallback((screenId: string) => {
     setActiveScreen(screenId);
@@ -43,6 +46,13 @@ export default function PortfolioContainer({ blogPostsMeta }: Props) {
                   id={active.screen_name}
                   screenName={active.screen_name}
                   posts={blogPostsMeta}
+                />
+              ) : active?.screen_name === "Projects" ? (
+                <Projects
+                  key={activeScreen}
+                  id={active.screen_name}
+                  screenName={active.screen_name}
+                  projects={projects}
                 />
               ) : ActiveComponent && active ? (
                 <ActiveComponent

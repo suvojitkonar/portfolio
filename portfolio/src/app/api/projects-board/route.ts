@@ -5,7 +5,7 @@ import {
   PROJECTS_BOARD_KV_KEY,
   normalizeColumns,
 } from "@/lib/projects-board-state";
-import { projects } from "@/components/portfolio/Projects/projectsData";
+import { getAllProjects } from "@/lib/projects";
 import {
   getTcpRedisClient,
   tcpRedisConfigured,
@@ -73,7 +73,7 @@ async function boardSet(value: Record<string, string[]>): Promise<void> {
 }
 
 function allProjectIds(): string[] {
-  return projects.map((p) => p.id);
+  return getAllProjects().map((p) => p.id);
 }
 
 export async function GET() {
