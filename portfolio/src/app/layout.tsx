@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
@@ -19,6 +19,11 @@ export const metadata: Metadata = {
   description: "Full stack developer portfolio",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,7 +37,11 @@ export default function RootLayout({
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
         />
       </head>
-      <body className={`${poppins.className} min-h-screen`}>{children}</body>
+      <body
+        className={`${poppins.className} min-h-screen min-w-0 overflow-x-hidden`}
+      >
+        {children}
+      </body>
     </html>
   );
 }

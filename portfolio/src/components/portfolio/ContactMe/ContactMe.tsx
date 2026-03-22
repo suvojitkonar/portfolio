@@ -48,9 +48,9 @@ export default function ContactMe({ id }: Props) {
         "translate-y-20 transition-all duration-700 ease-out"
       )}
     >
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto w-full min-w-0 max-w-2xl">
         <ScreenHeading title="Contact Me" subHeading="Let's build something" />
-        <div className="border-4 border-foreground bg-card p-8 shadow-neo-lg">
+        <div className="border-4 border-foreground bg-card p-4 shadow-neo-lg sm:p-8">
           <p className="mb-8 text-center text-sm leading-relaxed text-muted">
             Have a project in mind? Send a message below.
             {/* <code className="border border-foreground bg-background px-1 py-0.5 font-mono text-xs">
@@ -101,7 +101,7 @@ export default function ContactMe({ id }: Props) {
               Send via email
             </Button>
           </form>
-          <div className="mt-10 flex justify-center gap-8 border-t-4 border-foreground pt-8 text-2xl">
+          <div className="mt-10 flex flex-wrap justify-center gap-6 border-t-4 border-foreground pt-8 text-2xl sm:gap-8">
             <a
               href="https://www.linkedin.com/in/suvojit-konar-5168a6161/"
               target="_blank"

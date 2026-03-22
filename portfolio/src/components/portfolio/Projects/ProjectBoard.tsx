@@ -12,6 +12,7 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  TouchSensor,
   useDraggable,
   useDroppable,
   useSensor,
@@ -21,15 +22,17 @@ import {
 } from "@dnd-kit/core";
 import type { Project } from "./projectsData";
 import { projectByIdMap } from "./projectsData";
+import {
+  COLUMN_IDS,
+  type ColumnId,
+  defaultColumns,
+  findColumnForProjectId,
+  isColumnId,
+  normalizeColumns,
+} from "@/lib/projects-board-state";
 import { cn } from "@/lib/utils";
 
-/** Client-visible gate only; not a security boundary. */
-const SAFE_WORD = "blueberrycheesecake";
-
 const STORAGE_KEY = "portfolio-projects-board";
-
-export const COLUMN_IDS = ["backlog", "inDevelopment", "done"] as const;
-export type ColumnId = (typeof COLUMN_IDS)[number];
 
 const COLUMN_LABELS: Record<ColumnId, string> = {
   backlog: "Backlog",
@@ -43,63 +46,6 @@ const COLUMN_HEADER_CLASS: Record<ColumnId, string> = {
   done: "bg-accent text-white",
 };
 
-function isColumnId(id: string): id is ColumnId {
-  return COLUMN_IDS.includes(id as ColumnId);
-}
-
-function normalizeColumns(
-  saved: unknown,
-  allIds: string[]
-): Record<ColumnId, string[]> {
-  const result: Record<ColumnId, string[]> = {
-    backlog: [],
-    inDevelopment: [],
-    done: [],
-  };
-  const used = new Set<string>();
-  const raw =
-    saved && typeof saved === "object"
-      ? (saved as Record<string, unknown>)
-      : null;
-
-  for (const col of COLUMN_IDS) {
-    const list = raw?.[col];
-    if (!Array.isArray(list)) continue;
-    for (const id of list) {
-      if (typeof id !== "string") continue;
-      if (allIds.includes(id) && !used.has(id)) {
-        result[col].push(id);
-        used.add(id);
-      }
-    }
-  }
-  for (const id of allIds) {
-    if (!used.has(id)) {
-      result.backlog.push(id);
-      used.add(id);
-    }
-  }
-  return result;
-}
-
-function findColumnForProjectId(
-  projectId: string,
-  cols: Record<ColumnId, string[]>
-): ColumnId | null {
-  for (const col of COLUMN_IDS) {
-    if (cols[col].includes(projectId)) return col;
-  }
-  return null;
-}
-
-function defaultColumns(allIds: string[]): Record<ColumnId, string[]> {
-  return {
-    backlog: [...allIds],
-    inDevelopment: [],
-    done: [],
-  };
-}
-
 function ProjectCardContent({
   project,
   dragHandleProps,
@@ -112,13 +58,15 @@ function ProjectCardContent({
       {dragHandleProps ? (
         <div
           {...dragHandleProps}
-          className="cursor-grab border-b-2 border-foreground bg-muted px-2 py-1.5 text-center text-xs font-bold uppercase tracking-wide text-foreground active:cursor-grabbing"
+          className="touch-none cursor-grab border-b-2 border-foreground bg-muted px-2 py-1.5 text-center text-xs font-bold uppercase tracking-wide text-foreground active:cursor-grabbing"
         >
           Drag
         </div>
       ) : null}
       <div className="flex flex-1 flex-col p-4 pt-3">
-        <h3 className="text-base font-bold text-foreground">{project.title}</h3>
+        <h3 className="break-words text-base font-bold text-foreground">
+          {project.title}
+        </h3>
         <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">
           {project.description}
         </p>
@@ -160,14 +108,17 @@ function ProjectCardContent({
 function DraggableProjectCard({
   project,
   columnId,
+  editable,
 }: {
   project: Project;
   columnId: ColumnId;
+  editable: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: project.id,
       data: { type: "project", columnId },
+      disabled: !editable,
     });
 
   const style = transform
@@ -187,7 +138,9 @@ function DraggableProjectCard({
     >
       <ProjectCardContent
         project={project}
-        dragHandleProps={{ ...listeners, ...attributes }}
+        dragHandleProps={
+          editable ? { ...listeners, ...attributes } : undefined
+        }
       />
     </article>
   );
@@ -232,6 +185,12 @@ type Props = {
   projects: Project[];
 };
 
+type ApiBoardResponse = {
+  columns?: unknown;
+  editable?: boolean;
+  persistence?: string;
+};
+
 export default function ProjectBoard({ projects: projectList }: Props) {
   const allIds = useMemo(() => projectList.map((p) => p.id), [projectList]);
   const byId = useMemo(() => projectByIdMap(projectList), [projectList]);
@@ -240,37 +199,79 @@ export default function ProjectBoard({ projects: projectList }: Props) {
     defaultColumns(allIds)
   );
   const [hydrated, setHydrated] = useState(false);
+  const [editable, setEditable] = useState(false);
+  const [serverBacked, setServerBacked] = useState(false);
+  const [apiPersistence, setApiPersistence] = useState<
+    "redis" | "none" | null
+  >(null);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+
   const columnsRef = useRef(columns);
   columnsRef.current = columns;
+  const editableRef = useRef(editable);
+  editableRef.current = editable;
+  const serverBackedRef = useRef(serverBacked);
+  serverBackedRef.current = serverBacked;
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as unknown;
-        setColumns(normalizeColumns(parsed, allIds));
-      } else {
-        setColumns(defaultColumns(allIds));
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/projects-board", {
+          credentials: "include",
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        const data = (await res.json()) as ApiBoardResponse;
+        if (cancelled) return;
+        setColumns(normalizeColumns(data.columns, allIds));
+        setEditable(Boolean(data.editable));
+        const isRedis = data.persistence === "redis";
+        setServerBacked(isRedis);
+        setApiPersistence(isRedis ? "redis" : "none");
+        setLoadFailed(false);
+      } catch {
+        if (cancelled) return;
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            setColumns(
+              normalizeColumns(JSON.parse(raw) as unknown, allIds)
+            );
+          } else {
+            setColumns(defaultColumns(allIds));
+          }
+        } catch {
+          setColumns(defaultColumns(allIds));
+        }
+        setEditable(process.env.NODE_ENV === "development");
+        setServerBacked(false);
+        setApiPersistence(null);
+        setLoadFailed(true);
+      } finally {
+        if (!cancelled) setHydrated(true);
       }
-    } catch {
-      setColumns(defaultColumns(allIds));
-    }
-    setHydrated(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [allIds]);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || serverBacked) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(columns));
     } catch {
-      /* ignore quota */
+      /* quota */
     }
-  }, [columns, hydrated]);
+  }, [columns, hydrated, serverBacked]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 6 },
     })
   );
 
@@ -293,27 +294,41 @@ export default function ProjectBoard({ projects: projectList }: Props) {
       ? overId
       : findColumnForProjectId(overId, cols);
 
-    if (!targetCol) return;
-    if (sourceCol === targetCol) return;
+    if (!targetCol || sourceCol === targetCol) return;
 
-    const answer = window.prompt("What's your safe word?");
-    if ((answer ?? "").trim() !== SAFE_WORD) return;
+    const previous = columnsRef.current;
+    const next: Record<ColumnId, string[]> = {
+      backlog: [...previous.backlog],
+      inDevelopment: [...previous.inDevelopment],
+      done: [...previous.done],
+    };
+    const t = isColumnId(overId)
+      ? overId
+      : findColumnForProjectId(overId, previous);
+    if (!t || sourceCol === t) return;
 
-    setColumns((prev) => {
-      const t =
-        isColumnId(overId) ? overId : findColumnForProjectId(overId, prev);
-      if (!t || sourceCol === t) return prev;
-      const next: Record<ColumnId, string[]> = {
-        backlog: [...prev.backlog],
-        inDevelopment: [...prev.inDevelopment],
-        done: [...prev.done],
-      };
-      next[sourceCol] = next[sourceCol].filter((id) => id !== draggedId);
-      if (!next[t].includes(draggedId)) {
-        next[t] = [...next[t], draggedId];
-      }
-      return next;
-    });
+    next[sourceCol] = next[sourceCol].filter((id) => id !== draggedId);
+    if (!next[t].includes(draggedId)) {
+      next[t] = [...next[t], draggedId];
+    }
+
+    setColumns(next);
+
+    if (serverBackedRef.current && editableRef.current) {
+      void (async () => {
+        try {
+          const res = await fetch("/api/projects-board", {
+            method: "PUT",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(next),
+          });
+          if (!res.ok) throw new Error();
+        } catch {
+          setColumns(previous);
+        }
+      })();
+    }
   }, []);
 
   const onDragCancel = useCallback(() => {
@@ -323,41 +338,83 @@ export default function ProjectBoard({ projects: projectList }: Props) {
   const activeProject = activeId ? byId.get(activeId) : undefined;
 
   return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragCancel={onDragCancel}
-    >
-      <div className="flex w-full flex-col gap-4 min-[900px]:flex-row min-[900px]:items-stretch">
-        {COLUMN_IDS.map((colId) => (
-          <KanbanColumn
-            key={colId}
-            columnId={colId}
-            title={COLUMN_LABELS[colId]}
-            headerClass={COLUMN_HEADER_CLASS[colId]}
+    <div className="w-full min-w-0">
+      {hydrated && serverBacked && !editable ? (
+        <p className="mb-4 text-center text-xs leading-relaxed text-muted">
+          This layout is shared for everyone. Sign in at{" "}
+          <a
+            href="/admin/blog"
+            className="font-semibold text-primary underline decoration-2 underline-offset-4"
           >
-            {columns[colId].map((id) => {
-              const p = byId.get(id);
-              if (!p) return null;
-              return (
-                <DraggableProjectCard
-                  key={id}
-                  project={p}
-                  columnId={colId}
-                />
-              );
-            })}
-          </KanbanColumn>
-        ))}
-      </div>
-      <DragOverlay dropAnimation={null}>
-        {activeProject ? (
-          <article className="flex max-w-[280px] flex-col border-4 border-foreground bg-background opacity-95 shadow-neo-lg">
-            <ProjectCardContent project={activeProject} />
-          </article>
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+            /admin/blog
+          </a>{" "}
+          (blog admin), then open this tab again to drag and save.
+        </p>
+      ) : null}
+      {hydrated && apiPersistence === "none" ? (
+        <p className="mb-4 text-center text-xs leading-relaxed text-muted">
+          Set either Upstash REST vars (
+          <code className="border border-foreground bg-background px-1 font-mono text-[10px]">
+            UPSTASH_REDIS_REST_URL
+          </code>
+          ,{" "}
+          <code className="border border-foreground bg-background px-1 font-mono text-[10px]">
+            UPSTASH_REDIS_REST_TOKEN
+          </code>
+          ) or a TCP URL (
+          <code className="border border-foreground bg-background px-1 font-mono text-[10px]">
+            STORAGE_REDIS_URL
+          </code>
+          ,{" "}
+          <code className="font-mono text-[10px]">redis://…</code>
+          ). REST is preferred if both are set.
+        </p>
+      ) : null}
+      {hydrated && loadFailed ? (
+        <p className="mb-4 text-center text-xs leading-relaxed text-muted">
+          {process.env.NODE_ENV === "development"
+            ? "Could not load board API; using localStorage for this browser only."
+            : "Could not load board from the server; showing default or saved layout."}
+        </p>
+      ) : null}
+
+      <DndContext
+        sensors={sensors}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        onDragCancel={onDragCancel}
+      >
+        <div className="flex w-full flex-col gap-4 min-[900px]:flex-row min-[900px]:items-stretch">
+          {COLUMN_IDS.map((colId) => (
+            <KanbanColumn
+              key={colId}
+              columnId={colId}
+              title={COLUMN_LABELS[colId]}
+              headerClass={COLUMN_HEADER_CLASS[colId]}
+            >
+              {columns[colId].map((id) => {
+                const p = byId.get(id);
+                if (!p) return null;
+                return (
+                  <DraggableProjectCard
+                    key={id}
+                    project={p}
+                    columnId={colId}
+                    editable={editable}
+                  />
+                );
+              })}
+            </KanbanColumn>
+          ))}
+        </div>
+        <DragOverlay dropAnimation={null}>
+          {activeProject ? (
+            <article className="flex max-w-[280px] flex-col border-4 border-foreground bg-background opacity-95 shadow-neo-lg">
+              <ProjectCardContent project={activeProject} />
+            </article>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+    </div>
   );
 }

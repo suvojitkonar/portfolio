@@ -24,7 +24,7 @@ export default function Home({ id }: Props) {
     <section
       id={id || ""}
       className={cn(
-        "fade-in relative flex min-h-[560px] flex-1 flex-col justify-between opacity-0",
+        "fade-in relative flex min-h-[min(560px,90dvh)] flex-1 flex-col justify-between opacity-0 sm:min-h-[560px]",
         "bg-[linear-gradient(135deg,hsl(var(--primary)/0.35)_0%,hsl(var(--background))_45%,hsl(var(--accent)/0.2)_100%)] bg-cover bg-center",
         "translate-y-20 transition-all duration-700 ease-out"
       )}

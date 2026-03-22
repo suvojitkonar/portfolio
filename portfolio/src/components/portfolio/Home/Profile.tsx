@@ -38,7 +38,7 @@ export default function Profile() {
             </span>
           </p>
           <div className="mt-4">
-            <h1 className="font-mono text-3xl font-bold leading-tight md:text-4xl">
+            <h1 className="break-words text-balance font-mono text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
               Platform developer & senior software engineer
             </h1>
             <p className="mt-3 text-base font-light text-muted md:text-lg">

@@ -42,13 +42,13 @@ export default function Testimonial({ id }: Props) {
         "translate-y-20 transition-all duration-700 ease-out"
       )}
     >
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto w-full min-w-0 max-w-5xl">
         <ScreenHeading title="Testimonials" subHeading="What people say" />
         <div className="grid gap-6 md:grid-cols-3">
           {quotes.map((q, i) => (
             <blockquote
               key={i}
-              className="flex flex-col border-4 border-foreground bg-card p-6 shadow-neo"
+              className="flex min-w-0 flex-col border-4 border-foreground bg-card p-4 shadow-neo sm:p-6"
             >
               <p className="flex-1 text-sm italic leading-relaxed text-foreground">
                 <span className="text-3xl font-black text-primary">&ldquo;</span>

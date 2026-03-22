@@ -30,16 +30,18 @@ export default function Blog({ id, posts }: Props) {
         "translate-y-20 transition-all duration-700 ease-out"
       )}
     >
-      <div className="w-full max-w-5xl">
+      <div className="w-full min-w-0 max-w-5xl">
         <ScreenHeading title="Blog & articles" subHeading="Writing and notes" />
         <div className="grid gap-6 md:grid-cols-2">
           {posts.map((post) => (
             <article
               key={post.slug}
-              className="flex flex-col border-4 border-foreground bg-background p-6 shadow-neo"
+              className="flex min-w-0 flex-col border-4 border-foreground bg-background p-4 shadow-neo sm:p-6"
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h3 className="text-lg font-bold text-foreground">{post.title}</h3>
+                <h3 className="break-words text-lg font-bold text-foreground">
+                  {post.title}
+                </h3>
                 {post.publishedAt ? (
                   <span className="text-xs font-semibold uppercase tracking-wide text-muted">
                     {post.publishedAt}

@@ -32,12 +32,19 @@ export default function AboutMe({ id }: Props) {
         <ScreenHeading title="About Me" subHeading="Why choose me?" />
         <div className="flex flex-col overflow-hidden border-4 border-foreground bg-card shadow-neo-lg md:flex-row">
           <div
+            className="h-44 shrink-0 border-b-4 border-foreground bg-muted bg-cover bg-center md:hidden"
+            style={{
+              backgroundImage: "url(/assets/AboutMe/me.jpg)",
+            }}
+            aria-hidden
+          />
+          <div
             className="hidden min-h-[280px] border-b-4 border-foreground bg-muted bg-cover bg-center md:block md:w-1/2 md:border-b-0 md:border-r-4"
             style={{
               backgroundImage: "url(/assets/AboutMe/me.jpg)",
             }}
           />
-          <div className="flex flex-1 flex-col justify-center gap-6 p-8 text-sm leading-relaxed text-foreground md:w-1/2 md:text-base">
+          <div className="flex min-w-0 flex-1 flex-col justify-center gap-6 p-5 text-sm leading-relaxed text-foreground sm:p-6 md:w-1/2 md:p-8 md:text-base">
             <p>
               I am a full-stack developer with experience building web
               applications end to end—from responsive interfaces to reliable APIs

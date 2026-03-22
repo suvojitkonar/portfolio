@@ -26,8 +26,8 @@ export default function BlogArticlePage({ params }: Props) {
   if (!post) notFound();
 
   return (
-    <div className="min-h-screen bg-background px-4 py-10 text-foreground md:px-8">
-      <div className="mx-auto max-w-3xl border-4 border-foreground bg-card p-8 shadow-neo-lg md:p-12">
+    <div className="min-h-screen min-w-0 bg-background px-3 py-8 text-foreground sm:px-4 sm:py-10 md:px-8">
+      <div className="mx-auto max-w-3xl min-w-0 border-4 border-foreground bg-card p-4 shadow-neo-lg sm:p-8 md:p-12">
         <Link
           href="/"
           className="text-sm font-semibold text-primary underline decoration-2 underline-offset-4 hover:opacity-80"

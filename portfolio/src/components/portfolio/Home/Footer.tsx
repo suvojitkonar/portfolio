@@ -5,7 +5,7 @@ export default function Footer() {
         <img
           src="/assets/Home/shape-bg.png"
           alt=""
-          className="h-auto w-full object-contain opacity-90"
+          className="h-auto max-w-full w-full object-contain opacity-90"
         />
       </div>
     </div>

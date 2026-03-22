@@ -9,7 +9,7 @@ type Props = {
 
 export default function BlogMarkdown({ markdown }: Props) {
   return (
-    <div className="blog-markdown mt-10 text-sm leading-relaxed text-foreground md:text-base">
+    <div className="blog-markdown mt-10 min-w-0 text-sm leading-relaxed text-foreground md:text-base">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
@@ -58,7 +58,7 @@ export default function BlogMarkdown({ markdown }: Props) {
             }
             return (
               <code
-                className={`block overflow-x-auto border-2 border-foreground bg-background p-4 font-mono text-xs shadow-neo-sm ${className ?? ""}`}
+                className={`block max-w-full min-w-0 overflow-x-auto break-words border-2 border-foreground bg-background p-3 font-mono text-xs shadow-neo-sm sm:p-4 ${className ?? ""}`}
                 {...rest}
               >
                 {children}
@@ -66,7 +66,25 @@ export default function BlogMarkdown({ markdown }: Props) {
             );
           },
           pre: ({ children }) => (
-            <pre className="my-4 overflow-x-auto">{children}</pre>
+            <pre className="my-4 max-w-full min-w-0 overflow-x-auto rounded-none">
+              {children}
+            </pre>
+          ),
+          table: ({ children }) => (
+            <div className="my-4 w-full min-w-0 overflow-x-auto">
+              <table className="w-max min-w-full border-collapse border-2 border-foreground text-left text-sm">
+                {children}
+              </table>
+            </div>
+          ),
+          thead: ({ children }) => (
+            <thead className="border-b-2 border-foreground bg-muted/40">{children}</thead>
+          ),
+          th: ({ children }) => (
+            <th className="border border-foreground px-3 py-2 font-bold">{children}</th>
+          ),
+          td: ({ children }) => (
+            <td className="border border-foreground px-3 py-2 align-top">{children}</td>
           ),
           blockquote: ({ children }) => (
             <blockquote className="my-4 border-l-4 border-primary pl-4 italic text-muted">

@@ -23,16 +23,16 @@ export default function PortfolioContainer({ blogPostsMeta }: Props) {
 
   return (
     <PortfolioNavProvider goTo={goTo}>
-      <div className="flex min-h-screen flex-col bg-background">
+      <div className="flex min-h-screen min-w-0 flex-col bg-background">
         <Header activeScreen={activeScreen} onNavigate={goTo} />
         <main
           role="main"
-          className="flex flex-1 flex-col px-4 py-6 md:px-8"
+          className="flex min-h-0 min-w-0 flex-1 flex-col px-3 py-4 sm:px-4 sm:py-6 md:px-8"
         >
           <div
             className={cn(
-              "mx-auto flex min-h-[min(70vh,720px)] w-full max-w-6xl flex-1 flex-col border-4 border-foreground bg-card shadow-neo-lg",
-              activeScreen === "Home" ? "overflow-hidden p-0" : "p-6 md:p-10"
+              "mx-auto flex min-h-[min(70vh,720px)] w-full min-w-0 max-w-6xl flex-1 flex-col border-4 border-foreground bg-card shadow-neo-lg",
+              activeScreen === "Home" ? "overflow-hidden p-0" : "p-4 sm:p-6 md:p-10"
             )}
           >
             {active?.screen_name === "Blog" ? (

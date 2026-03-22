@@ -25,7 +25,7 @@ export default function Resume({ id }: Props) {
         "translate-y-20 transition-all duration-700 ease-out"
       )}
     >
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto w-full min-w-0 max-w-4xl">
         <ScreenHeading title="Resume" subHeading="My bio & work" />
         <div className="space-y-12">
           <div>
@@ -36,7 +36,7 @@ export default function Resume({ id }: Props) {
               {experience.map((job, i) => (
                 <article key={i} className="relative">
                   <span className="absolute -left-[31px] top-1.5 h-3 w-3 border-2 border-foreground bg-accent shadow-neo-sm" />
-                  <h4 className="font-bold text-foreground">
+                  <h4 className="break-words text-balance font-bold text-foreground">
                     {job.title} — {job.company}
                   </h4>
                   <p className="text-sm text-muted">{job.period}</p>
@@ -53,7 +53,7 @@ export default function Resume({ id }: Props) {
               {education.map((edu, i) => (
                 <article key={i} className="relative">
                   <span className="absolute -left-[31px] top-1.5 h-3 w-3 border-2 border-foreground bg-primary shadow-neo-sm" />
-                  <h4 className="font-bold">{edu.degree}</h4>
+                  <h4 className="break-words text-balance font-bold">{edu.degree}</h4>
                   <p className="text-sm text-muted">
                     {edu.school} · {edu.period}
                   </p>

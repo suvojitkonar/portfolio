@@ -91,7 +91,7 @@ export default function AdminBlogPage() {
 
   if (sessionOk === null) {
     return (
-      <div className="min-h-screen bg-background px-4 py-16 text-foreground">
+      <div className="min-h-screen min-w-0 bg-background px-3 py-12 text-foreground sm:px-4 sm:py-16">
         <p className="text-center text-sm text-muted">Loading…</p>
       </div>
     );
@@ -99,8 +99,8 @@ export default function AdminBlogPage() {
 
   if (!sessionOk) {
     return (
-      <div className="min-h-screen bg-background px-4 py-16 text-foreground">
-        <div className="mx-auto max-w-md border-4 border-foreground bg-card p-8 shadow-neo-lg">
+      <div className="min-h-screen min-w-0 bg-background px-3 py-12 text-foreground sm:px-4 sm:py-16">
+        <div className="mx-auto max-w-md border-4 border-foreground bg-card p-5 shadow-neo-lg sm:p-8">
           <h1 className="font-mono text-xl font-bold">Blog admin</h1>
           <p className="mt-2 text-sm text-muted">Sign in to write and publish.</p>
           <form className="mt-8 space-y-4" onSubmit={handleLogin}>
@@ -132,8 +132,8 @@ export default function AdminBlogPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background px-4 py-10 text-foreground md:px-8">
-      <div className="mx-auto max-w-4xl border-4 border-foreground bg-card p-6 shadow-neo-lg md:p-10">
+    <div className="min-h-screen min-w-0 bg-background px-3 py-8 text-foreground sm:px-4 sm:py-10 md:px-8">
+      <div className="mx-auto max-w-4xl min-w-0 border-4 border-foreground bg-card p-4 shadow-neo-lg sm:p-6 md:p-10">
         <div className="flex flex-wrap items-start justify-between gap-4 border-b-4 border-foreground pb-6">
           <div>
             <h1 className="font-mono text-2xl font-bold">Write blog post</h1>
@@ -246,7 +246,7 @@ export default function AdminBlogPage() {
         {showPreview ? (
           <div className="mt-10 border-t-4 border-foreground pt-8">
             <h2 className="font-mono text-lg font-bold">Preview</h2>
-            <div className="mt-4 border-4 border-foreground bg-background p-6 shadow-neo">
+            <div className="mt-4 min-w-0 border-4 border-foreground bg-background p-4 shadow-neo sm:p-6">
               <BlogMarkdown markdown={bodyMarkdown || "*Nothing to preview.*"} />
             </div>
           </div>
