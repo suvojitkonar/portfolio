@@ -30,10 +30,10 @@ export default function Header({ activeScreen, onNavigate }: Props) {
           onClick={() => setShowHeaderOptions(false)}
         />
       ) : null}
-      <div className="relative z-[1002] flex w-[70%] max-w-5xl items-center justify-between max-md:w-full max-md:px-4 sm:max-md:px-6">
+      <div className="relative z-[1002] flex w-[70%] max-w-5xl items-center justify-between gap-3 max-md:w-full max-md:px-4 sm:max-md:px-6">
         <button
           type="button"
-          className="hidden text-foreground max-md:block"
+          className="hidden shrink-0 text-foreground max-md:block"
           onClick={() => setShowHeaderOptions(!showHeaderOptions)}
           aria-expanded={showHeaderOptions}
           aria-controls="portfolio-nav"
@@ -41,7 +41,7 @@ export default function Header({ activeScreen, onNavigate }: Props) {
         >
           <FontAwesomeIcon icon={faBars} className="text-3xl" />
         </button>
-        <div className="border-4 border-foreground bg-primary px-4 py-3 text-base font-bold uppercase shadow-neo max-md:mb-0 sm:px-6 sm:py-4 sm:text-lg md:mb-6">
+        <div className="min-w-0 border-4 border-foreground bg-primary px-4 py-3 text-base font-bold uppercase shadow-neo max-md:mb-0 sm:px-6 sm:py-4 sm:text-lg md:mb-6">
           Suvojit&apos;s
         </div>
         <nav
@@ -64,7 +64,7 @@ export default function Header({ activeScreen, onNavigate }: Props) {
               <FontAwesomeIcon icon={faXmark} className="text-2xl" />
             </button>
           </div>
-          <div className="flex flex-1 flex-col items-center justify-center gap-6 max-md:px-4 max-md:pb-8 md:flex-row md:items-center md:gap-12 md:px-0 md:pb-0">
+          <div className="flex flex-1 flex-col items-center justify-center gap-6 max-md:px-4 max-md:pb-8 md:flex-row md:items-center md:gap-6 lg:gap-10 md:px-0 md:pb-0">
             {TOTAL_SCREENS.map((screen, i) => (
               <button
                 key={screen.screen_name}
@@ -72,9 +72,8 @@ export default function Header({ activeScreen, onNavigate }: Props) {
                 role="tab"
                 aria-selected={selectedScreen === i}
                 className={cn(
-                  "border-b-2 border-transparent px-2 text-center transition-colors hover:text-primary max-md:py-2 md:text-left",
-                  selectedScreen === i &&
-                    "border-foreground font-bold text-primary underline decoration-4 underline-offset-4"
+                  "whitespace-nowrap border-b-4 border-transparent px-1 text-center text-foreground transition-colors hover:text-primary max-md:py-2 md:px-0 md:text-left",
+                  selectedScreen === i && "border-foreground font-bold"
                 )}
                 onClick={() => switchScreen(screen.screen_name)}
               >

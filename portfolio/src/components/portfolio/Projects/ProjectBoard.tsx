@@ -49,9 +49,12 @@ const COLUMN_HEADER_CLASS: Record<ColumnId, string> = {
 function ProjectCardContent({
   project,
   dragHandleProps,
+  omitReadLink,
 }: {
   project: Project;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
+  /** Hide Read during drag overlay preview */
+  omitReadLink?: boolean;
 }) {
   return (
     <>
@@ -80,8 +83,18 @@ function ProjectCardContent({
             </span>
           ))}
         </div>
-        {project.href || project.repo ? (
+        {!omitReadLink || project.href || project.repo ? (
           <div className="mt-4 flex flex-wrap gap-3 border-t-2 border-foreground pt-3 text-sm font-semibold">
+            {!omitReadLink ? (
+              <a
+                href={`/projects/${project.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary underline decoration-2 underline-offset-4 hover:opacity-80"
+              >
+                Read
+              </a>
+            ) : null}
             {project.href ? (
               <a
                 href={project.href}
@@ -410,7 +423,7 @@ export default function ProjectBoard({ projects: projectList }: Props) {
         <DragOverlay dropAnimation={null}>
           {activeProject ? (
             <article className="flex max-w-[280px] flex-col border-4 border-foreground bg-background opacity-95 shadow-neo-lg">
-              <ProjectCardContent project={activeProject} />
+              <ProjectCardContent project={activeProject} omitReadLink />
             </article>
           ) : null}
         </DragOverlay>

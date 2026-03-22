@@ -46,11 +46,13 @@ export default function AboutMe({ id }: Props) {
           />
           <div className="flex min-w-0 flex-1 flex-col justify-center gap-6 p-5 text-sm leading-relaxed text-foreground sm:p-6 md:w-1/2 md:p-8 md:text-base">
             <p>
-              I am a full-stack developer with experience building web
-              applications end to end—from responsive interfaces to reliable APIs
-              and data pipelines. I enjoy turning complex requirements into clear,
-              maintainable solutions and collaborating closely with teams to ship
-              on time.
+              I&apos;m a backend developer turned AI wrangler. I specialize in
+              building the digital &apos;brains&apos; of applications—from reliable
+              APIs to data pipelines that feed hungry models. I spend my days turning
+              complex requirements into clean code and convincing LLMs that
+              &apos;hallucinating&apos; isn&apos;t a valid career path. If it involves
+              RAG, vector databases, or high-octane backends, I&apos;m probably
+              already building it (and shipping it on time).
             </p>
             <div>
               <p className="mb-3 font-bold uppercase tracking-wide text-foreground">
@@ -58,9 +60,9 @@ export default function AboutMe({ id }: Props) {
               </p>
               <ul className="space-y-3">
                 {[
-                  "Full-stack web development with React and modern tooling",
-                  "Backend services, APIs, and data engineering with Spark and Hadoop",
-                  "Strong focus on performance, accessibility, and clean code",
+                  "Agentic AI wrangler specializing in Google ADK, AG UI, and making sure LLMs don't go rogue.",
+                  "Architect of high-octane backends and Playwright automation scripts that do the boring stuff for you.",
+                  "Obsessed with clean code, agentic loops, and shipping before the coffee goes cold.",
                 ].map((line) => (
                   <li key={line} className="flex items-start gap-3">
                     <span className="mt-1.5 h-3 w-3 shrink-0 border-2 border-foreground bg-primary shadow-neo-sm" />

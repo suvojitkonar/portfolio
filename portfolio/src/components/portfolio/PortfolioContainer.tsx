@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import Header from "@/components/portfolio/Home/Header";
 import Blog from "@/components/portfolio/Blog/Blog";
+import SiteFooter from "@/components/portfolio/SiteFooter";
 import { TOTAL_SCREENS } from "@/lib/commonUtilities";
 import type { BlogPostMeta } from "@/lib/blog";
 import { PortfolioNavProvider } from "@/lib/portfolioNav";
@@ -29,26 +30,29 @@ export default function PortfolioContainer({ blogPostsMeta }: Props) {
           role="main"
           className="flex min-h-0 min-w-0 flex-1 flex-col px-3 py-4 sm:px-4 sm:py-6 md:px-8"
         >
-          <div
-            className={cn(
-              "mx-auto flex min-h-[min(70vh,720px)] w-full min-w-0 max-w-6xl flex-1 flex-col border-4 border-foreground bg-card shadow-neo-lg",
-              activeScreen === "Home" ? "overflow-hidden p-0" : "p-4 sm:p-6 md:p-10"
-            )}
-          >
-            {active?.screen_name === "Blog" ? (
-              <Blog
-                key={activeScreen}
-                id={active.screen_name}
-                screenName={active.screen_name}
-                posts={blogPostsMeta}
-              />
-            ) : ActiveComponent && active ? (
-              <ActiveComponent
-                key={activeScreen}
-                id={active.screen_name}
-                screenName={active.screen_name}
-              />
-            ) : null}
+          <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-1 flex-col">
+            <div
+              className={cn(
+                "flex min-h-[min(70vh,720px)] w-full min-w-0 flex-1 flex-col border-4 border-foreground bg-card shadow-neo-lg",
+                activeScreen === "Home" ? "overflow-hidden p-0" : "p-4 sm:p-6 md:p-10"
+              )}
+            >
+              {active?.screen_name === "Blog" ? (
+                <Blog
+                  key={activeScreen}
+                  id={active.screen_name}
+                  screenName={active.screen_name}
+                  posts={blogPostsMeta}
+                />
+              ) : ActiveComponent && active ? (
+                <ActiveComponent
+                  key={activeScreen}
+                  id={active.screen_name}
+                  screenName={active.screen_name}
+                />
+              ) : null}
+            </div>
+            <SiteFooter />
           </div>
         </main>
       </div>
