@@ -3,6 +3,11 @@ import "server-only";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import {
+  ensureProjectStoreSeeded,
+  getStoredProjects,
+} from "@/lib/content-admin-store";
+import { redisConfigured } from "@/lib/redis-json";
 import type { Project } from "./project-model";
 
 export type { Project } from "./project-model";
@@ -74,7 +79,7 @@ function fileToProjectEntry(
   };
 }
 
-export function getAllProjects(): Project[] {
+export function getAllProjectsFromFiles(): Project[] {
   const entries = listMarkdownFiles().map((file) => fileToProjectEntry(file));
   const seen = new Set<string>();
   for (const { project: p } of entries) {
@@ -90,10 +95,23 @@ export function getAllProjects(): Project[] {
   return entries.map((e) => e.project);
 }
 
-export function getProjectById(id: string): Project | null {
+export function getProjectByIdFromFiles(id: string): Project | null {
   for (const file of listMarkdownFiles()) {
     const { project } = fileToProjectEntry(file);
     if (project.id === id) return project;
   }
   return null;
+}
+
+export async function getAllProjects(): Promise<Project[]> {
+  const fallback = getAllProjectsFromFiles();
+  if (!redisConfigured()) return fallback;
+  await ensureProjectStoreSeeded(fallback);
+  const stored = await getStoredProjects();
+  return stored ?? fallback;
+}
+
+export async function getProjectById(id: string): Promise<Project | null> {
+  const list = await getAllProjects();
+  return list.find((p) => p.id === id) ?? null;
 }

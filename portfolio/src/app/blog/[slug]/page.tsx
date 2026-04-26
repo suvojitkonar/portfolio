@@ -8,12 +8,12 @@ export const dynamic = "force-dynamic";
 
 type Props = { params: { slug: string } };
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
   return getAllPostSlugs();
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  const post = getPostBySlug(params.slug);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const post = await getPostBySlug(params.slug);
   if (!post) return { title: "Article" };
   return {
     title: `${post.title} — Suvojit`,
@@ -21,8 +21,8 @@ export function generateMetadata({ params }: Props): Metadata {
   };
 }
 
-export default function BlogArticlePage({ params }: Props) {
-  const post = getPostBySlug(params.slug);
+export default async function BlogArticlePage({ params }: Props) {
+  const post = await getPostBySlug(params.slug);
   if (!post) notFound();
 
   return (

@@ -1,6 +1,12 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import {
+  ensureBlogStoreSeeded,
+  getStoredBlogPosts,
+  toBlogMeta,
+} from "@/lib/content-admin-store";
+import { redisConfigured } from "@/lib/redis-json";
 
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 
@@ -42,7 +48,7 @@ function listMarkdownFiles(): string[] {
   return fs.readdirSync(BLOG_DIR).filter((f) => f.endsWith(".md"));
 }
 
-export function getAllPostsMeta(): BlogPostMeta[] {
+export function getAllPostsMetaFromFiles(): BlogPostMeta[] {
   const posts = listMarkdownFiles().map((file) => {
     const raw = fs.readFileSync(path.join(BLOG_DIR, file), "utf8");
     const { data } = matter(raw);
@@ -55,7 +61,7 @@ export function getAllPostsMeta(): BlogPostMeta[] {
   });
 }
 
-export function getPostBySlug(slug: string): BlogPost | null {
+export function getPostBySlugFromFiles(slug: string): BlogPost | null {
   for (const file of listMarkdownFiles()) {
     const full = path.join(BLOG_DIR, file);
     const raw = fs.readFileSync(full, "utf8");
@@ -68,6 +74,40 @@ export function getPostBySlug(slug: string): BlogPost | null {
   return null;
 }
 
-export function getAllPostSlugs(): { slug: string }[] {
-  return getAllPostsMeta().map((p) => ({ slug: p.slug }));
+export function getAllPostsFromFiles(): BlogPost[] {
+  return getAllPostsMetaFromFiles()
+    .map((meta) => {
+      const full = getPostBySlugFromFiles(meta.slug);
+      if (!full) return null;
+      return full;
+    })
+    .filter((post): post is BlogPost => post !== null);
+}
+
+function compareByPublishedAtDesc(a: BlogPostMeta, b: BlogPostMeta): number {
+  const ya = a.publishedAt ?? "";
+  const yb = b.publishedAt ?? "";
+  return yb.localeCompare(ya);
+}
+
+export async function getAllPostsMeta(): Promise<BlogPostMeta[]> {
+  const fallback = getAllPostsMetaFromFiles();
+  if (!redisConfigured()) return fallback;
+  await ensureBlogStoreSeeded(getAllPostsFromFiles());
+  const stored = await getStoredBlogPosts();
+  if (!stored) return fallback;
+  return stored.map(toBlogMeta).sort(compareByPublishedAtDesc);
+}
+
+export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
+  if (!redisConfigured()) return getPostBySlugFromFiles(slug);
+  await ensureBlogStoreSeeded(getAllPostsFromFiles());
+  const stored = await getStoredBlogPosts();
+  if (!stored) return getPostBySlugFromFiles(slug);
+  return stored.find((p) => p.slug === slug) ?? null;
+}
+
+export async function getAllPostSlugs(): Promise<{ slug: string }[]> {
+  const posts = await getAllPostsMeta();
+  return posts.map((p) => ({ slug: p.slug }));
 }

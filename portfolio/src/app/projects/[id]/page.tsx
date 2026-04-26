@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 
 type Props = { params: { id: string } };
 
-export function generateMetadata({ params }: Props): Metadata {
-  const project = getProjectById(params.id);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const project = await getProjectById(params.id);
   if (!project) return { title: "Project" };
   return {
     title: `${project.title} — Suvojit`,
@@ -17,8 +17,8 @@ export function generateMetadata({ params }: Props): Metadata {
   };
 }
 
-export default function ProjectReadPage({ params }: Props) {
-  const project = getProjectById(params.id);
+export default async function ProjectReadPage({ params }: Props) {
+  const project = await getProjectById(params.id);
   if (!project) notFound();
 
   return (

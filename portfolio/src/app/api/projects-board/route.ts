@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { Redis } from "@upstash/redis";
 import { isBlogAdminSession } from "@/lib/blog-admin-session";
 import {
   PROJECTS_BOARD_KV_KEY,
@@ -7,77 +6,26 @@ import {
 } from "@/lib/projects-board-state";
 import { getAllProjects } from "@/lib/projects";
 import {
-  getTcpRedisClient,
-  tcpRedisConfigured,
-} from "@/lib/redis-tcp-client";
-
-function redisRestConfig(): { url: string; token: string } | null {
-  const url =
-    process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
-  const token =
-    process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
-  if (!url || !token) return null;
-  return { url, token };
-}
-
-function redisConfigured(): boolean {
-  return redisRestConfig() !== null || tcpRedisConfigured();
-}
-
-function getUpstashRedis(): Redis | null {
-  const cfg = redisRestConfig();
-  if (!cfg) return null;
-  return new Redis({ url: cfg.url, token: cfg.token });
-}
+  redisConfigured,
+  redisGetJson,
+  redisSetJson,
+} from "@/lib/redis-json";
 
 async function boardGet(): Promise<unknown> {
-  const rest = getUpstashRedis();
-  if (rest) {
-    try {
-      return await rest.get(PROJECTS_BOARD_KV_KEY);
-    } catch {
-      return null;
-    }
-  }
-  if (tcpRedisConfigured()) {
-    try {
-      const redis = await getTcpRedisClient();
-      if (!redis) return null;
-      const raw = await redis.get(PROJECTS_BOARD_KV_KEY);
-      if (raw == null) return null;
-      try {
-        return JSON.parse(raw) as unknown;
-      } catch {
-        return null;
-      }
-    } catch {
-      return null;
-    }
-  }
-  return null;
+  return redisGetJson<unknown>(PROJECTS_BOARD_KV_KEY);
 }
 
 async function boardSet(value: Record<string, string[]>): Promise<void> {
-  const rest = getUpstashRedis();
-  if (rest) {
-    await rest.set(PROJECTS_BOARD_KV_KEY, value);
-    return;
-  }
-  if (tcpRedisConfigured()) {
-    const redis = await getTcpRedisClient();
-    if (!redis) throw new Error("Redis TCP client unavailable");
-    await redis.set(PROJECTS_BOARD_KV_KEY, JSON.stringify(value));
-    return;
-  }
-  throw new Error("Redis not configured");
+  await redisSetJson(PROJECTS_BOARD_KV_KEY, value);
 }
 
-function allProjectIds(): string[] {
-  return getAllProjects().map((p) => p.id);
+async function allProjectIds(): Promise<string[]> {
+  const projects = await getAllProjects();
+  return projects.map((p) => p.id);
 }
 
 export async function GET() {
-  const allIds = allProjectIds();
+  const allIds = await allProjectIds();
   let stored: unknown = null;
   if (redisConfigured()) {
     stored = await boardGet();
@@ -108,7 +56,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const columns = normalizeColumns(body, allProjectIds());
+  const columns = normalizeColumns(body, await allProjectIds());
 
   try {
     await boardSet(columns);

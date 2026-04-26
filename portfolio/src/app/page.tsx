@@ -4,9 +4,11 @@ import { getAllProjects } from "@/lib/projects";
 
 export const dynamic = "force-dynamic";
 
-export default function HomePage() {
-  const blogPostsMeta = getAllPostsMeta();
-  const projects = getAllProjects();
+export default async function HomePage() {
+  const [blogPostsMeta, projects] = await Promise.all([
+    getAllPostsMeta(),
+    getAllProjects(),
+  ]);
   return (
     <PortfolioContainer blogPostsMeta={blogPostsMeta} projects={projects} />
   );
